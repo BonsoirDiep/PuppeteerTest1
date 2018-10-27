@@ -21,7 +21,6 @@ const uploadInfoTemplate_1 = require("./util/uploadInfoTemplate");
 const extractTokensFromDOM_1 = require("./util/extractTokensFromDOM");
 const Album_1 = require("./Album");
 const Photo_1 = require("./Photo");
-const packageInfo = JSON.parse(fs.readFileSync(__dirname + '/../package.json', 'utf8'));
 
 var FileCookieStore = require('tough-cookie-filestore');
 class GPhotos {
@@ -54,7 +53,7 @@ class GPhotos {
         this.options = Object.assign(defaultOptions, options);
         this.axios = axios_cookiejar_support_1.default(axios_1.default.create({
             headers: {
-                'User-Agent': `Mozilla/5.0 UploadGPhotos/${packageInfo.version}`,
+                'User-Agent': 'Mozilla/5.0 UploadGPhotos/2.0.14',
             },
             validateStatus: () => true,
             maxRedirects: 0,
