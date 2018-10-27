@@ -1,16 +1,11 @@
 const path = require('path');
-const GPhotos = require('./gphotos-cookie').default;
+const uploadTool= require('./index');
 
-const gphotos = new GPhotos({});
 
 (async () => {
-  /*await gphotos.login();
-  const album = await gphotos.fetchAllPhotoList();
-  console.log(album);*/
-
-  await gphotos.login();
+  await uploadTool.sleep(3);
   const filePath= __dirname+ '/test.jpg'
-  const photo = await gphotos.upload(filePath);
-  const album = await gphotos.searchOrCreateAlbum('TestAlbum');
-  await album.addPhoto(photo);
+  var x= await uploadTool.up(filePath, 'TestAlbum');
+  if(x.err) return console.log(x.err);
+  console.log(x.data);
 })().catch(console.error);
