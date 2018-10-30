@@ -1,4 +1,4 @@
-const {meRq, meRqChromeNonCookie, HOST_BASIC, download, download2, database, save}= require('./rq');
+const {meRq, tryHdVideoId, HOST_BASIC, download, download2, database, save}= require('./rq');
 
 function getlistImages(opt, cb){
     var id= ''+ opt.id;
@@ -120,22 +120,6 @@ function getlistVideos(opt, cb){
     })
 }
 
-function tryHdVideoId(id){
-    return new Promise(function(solve){
-        meRqChromeNonCookie('https://www.facebook.com/'+ id, function(err, $, body){
-            if(err) return solve({err});
-            const hdk= ',hd_src:"';
-            var a= body.indexOf(hdk);
-            if(a==-1){
-                require('fs').writeFileSync('./fb/coop/failedFB.html', body)
-                return solve({err: 'not hd_src'});
-            }
-            a+= hdk.length;
-            body= body.substring(a, body.indexOf('"', a));
-            solve({url: body});
-        })
-    })
-}
 function scanVideos(opt, xPath){
     getlistVideos({id: opt.id, url: opt.url}, function(er, dat){
         if(er) return console.error(er);
@@ -145,9 +129,9 @@ function scanVideos(opt, xPath){
             if(dat.videos.length>0){
                 for(var i in dat.videos){
                     const idItem= dat.videos[i];
-                    var tmp= await tryHdVideoId(idItem);
+                    var tmp= await tryHdVideoId(idItem, false);
                     if(idItem && !database[idItem]){
-                        var x= {data: tmp.url || undefined};
+                        var x= {data: tmp.data || undefined};
                         if(x.data){
                             database[idItem]= true;
                             save();

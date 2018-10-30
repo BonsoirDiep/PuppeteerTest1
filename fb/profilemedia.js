@@ -1,4 +1,4 @@
-const {meRq, meRqChrome, meRqChromeNonCookie, HOST_BASIC, download, download2, database, save}= require('./rq');
+const {meRq, meRqChrome, tryHdVideoId, HOST_BASIC, download, download2, database, save}= require('./rq');
 
 //const KeyAlbum= '/photoset/t.'; // 
 const KeyAlbum= '/photoset/pb.';
@@ -12,8 +12,8 @@ function listImages(opt, cb){
         $('#root>table>tbody>tr>td>div>a').each(function(i, el){
             var a= $(this).attr('href');
             if(a.includes('/photo.php?')) data.images.push(HOST_BASIC+ a);
-            // Video từ Lê Thị Hồng videos_by
-            // Video của Lê Thị Hồng
+            // Video từ X videos_by
+            // Video của X
             /*else {
                 var idVideo= a.GetValue2('id');
                 var idUser= opt.id || opt.url.GetValue2('owner_id');
@@ -112,7 +112,7 @@ function getJson5(body, truoc, sau, res){
 
 function listVideos(opt, cb){
     if(!opt.id) return cb({message: 'not opt.id'});
-    meRqChrome('https://web.facebook.com/'+ opt.id+ '/videos_by', function(err, $, body){
+    meRqChrome('https://www.facebook.com/'+ opt.id+ '/videos_by', function(err, $, body){
         var async_get_token= getJson4(body, 'async_get_token":"', '"');
         var pagelet_token= getJson5(body, 'pagelet_token:"', '"');
         var data_fbid= getJson5(body, 'data-fbid="', '"');
@@ -137,7 +137,7 @@ function listVideos(opt, cb){
             "importer_state": null
         };
         
-        var more= "https://web.facebook.com/ajax/pagelet/generic.php/VideosByUserAppCollectionPagelet?";
+        var more= "https://www.facebook.com/ajax/pagelet/generic.php/VideosByUserAppCollectionPagelet?";
         var query1= {
             dpr: 1,
             fb_dtsg_ag: async_get_token,
@@ -153,11 +153,12 @@ function listVideos(opt, cb){
                 data_fbid= getJson5(body2, 'data-fbid=\\"', '\\"', data_fbid);
                 console.log('> len:', data_fbid.length);
                 if(body2.includes(cursorKey)){
+                    //require('fs').writeFileSync('./g.js', body2);
                     idx= body2.indexOf(cursorKey);
                     nextCursor= body2.substring(idx, body2.indexOf('"', idx));
                     //data.pagelet_token= pagelet_token[1];
                     data.cursor= nextCursor;
-                    var Nmore= "https://web.facebook.com/ajax/pagelet/generic.php/VideosByUserAppCollectionPagelet?"+ 
+                    var Nmore= "https://www.facebook.com/ajax/pagelet/generic.php/VideosByUserAppCollectionPagelet?"+ 
                         require('querystring').stringify({
                             dpr: 1,
                             fb_dtsg_ag: async_get_token,
@@ -174,27 +175,6 @@ function listVideos(opt, cb){
     })
 }
 
-async function detailVideoPromise(id){
-    return new Promise(function(solve){
-        meRqChromeNonCookie('https://www.facebook.com/'+ id, function(err, $, body){
-            if(err) return solve({err});
-            var hdk= ',hd_src:"';
-            var a= body.indexOf(hdk);
-            if(a==-1) {
-                hdk= ',sd_src:"';
-                a= body.indexOf(hdk);
-            }
-            if(a==-1){
-                require('fs').writeFileSync('./fb/coop/failedFB.html', body)
-                return solve({err: 'not hd_src, sd_src'});
-            }
-            a+= hdk.length;
-            const urlHd= body.substring(a, body.indexOf('"', a));
-            solve({data: urlHd});
-        })
-    })
-}
-
 function scanVideos(opt){
     if(!opt.id) return;
     listVideos({
@@ -205,7 +185,7 @@ function scanVideos(opt){
                 for(var i in data){
                     if(i!='0'){
                         var el= data[i];
-                        var x= await detailVideoPromise(el);
+                        var x= await tryHdVideoId(el, false);
                         if(x.data && !database[el]){
                             database[el]= true; save();
                             console.log('> download video:', el);
@@ -222,10 +202,10 @@ function scanVideos(opt){
 }
 
 // scanImages({
-//     id: '100009402376314'
+//     id: '123'
 // })
 
 scanVideos({
-    id: '100009402376314'
+    id: '123'
 })
 

@@ -9,18 +9,19 @@ const gphotos = new GPhotos({});
   console.log(album);*/
 
   await gphotos.login();
-  const filePath= __dirname+ '/test.jpg'
+  /*const filePath= __dirname+ '/test.jpg'
   const photo = await gphotos.upload(filePath);
   const album = await gphotos.searchOrCreateAlbum('TestAlbum');
-  await album.addPhoto(photo);
+  await album.addPhoto(photo);*/
 })().catch(error=>{
     console.error(error);
     process.exit();
 });
 
-async function up(filePath, albumName){
+async function up(filePath, fileName, desc, albumName){
     try {
-        const photo = await gphotos.upload(filePath);
+        const photo = await gphotos.upload(filePath, fileName);
+        await photo.modifyDescription(desc);
         const album = await gphotos.searchOrCreateAlbum(albumName);
         var x= await album.addPhoto(photo);
         return {data: photo};

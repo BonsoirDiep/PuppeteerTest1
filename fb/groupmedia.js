@@ -1,4 +1,4 @@
-const {saveUser, meRq, meRqChrome, HOST_BASIC, download, download2, database, save}= require('./rq');
+const {saveUser, tryHdVideoId, meRq, HOST_BASIC, download, download2, database, save}= require('./rq');
 
 
 function getlist(opt, cb){
@@ -42,28 +42,6 @@ function getdetail(opt, cb){
     })
 }
 
-async function detailVideoPromise(id){
-    return new Promise(function(solve){
-        meRqChrome('https://www.facebook.com/'+ id, function(err, $, body){
-            if(err) return solve({err});
-            const hdk= ',hd_src:"';
-            var a= body.indexOf(hdk);
-            if(a==-1){
-                require('fs').writeFileSync('./fb/coop/failedFB.html', body)
-                return solve({err: 'not hd_src'});
-            }
-            a+= hdk.length;
-            const urlHd= body.substring(a, body.indexOf('"', a));
-            var k1= 'profileID:"', idUser;
-            if(body.includes(k1)){
-                a= body.indexOf(k1)+ k1.length;
-                idUser= body.substring(a, body.indexOf('"', a));
-            }
-
-            solve({data: urlHd, idUser: idUser});
-        })
-    })
-}
 async function detailImagePromise(opt){
     return new Promise(function(solve){
         getdetail(opt, function(err, data){
@@ -105,9 +83,8 @@ function scanVideos(opt, xPath){
                     var el= dat.videos[i];
                     const idItem= el.GetValue2('id');
 
-
                     if(el && !database[idItem]){
-                        var x= await detailVideoPromise(idItem);
+                        var x= await tryHdVideoId(idItem, true);
                         if(x.data){
                             database[idItem]= true; save();
                             console.log('> download video');
@@ -134,6 +111,6 @@ function scanVideos(opt, xPath){
 }
 
 scanVideos({
-    //id: 1234
-    url: 'https://mbasic.facebook.com/media/set/?set=g.123&s=12&refid=56'
+    id: 1234
+    //url: 'https://mbasic.facebook.com/media/set/?set=g.1234'
 })

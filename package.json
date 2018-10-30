@@ -21,6 +21,7 @@
     "fs-extra": "^6.0.0",
     "inquirer": "^6.0.0",
     "log4js": "^3.0.0",
+    "lzma": "^2.3.2",
     "progress": "^2.0.0",
     "request": "^2.88.0",
     "static-eval": "^2.0.0",

@@ -108,10 +108,35 @@ const database= require('./database.json');
 function save(){
     require('fs').writeFileSync('./fb/database.json', JSON.stringify(database));
 }
+async function tryHdVideoId(id, hasCookie){
+    return new Promise(function(solve){
+        var browser= (hasCookie) ? meRqChrome : meRqChromeNonCookie;
+        browser('https://www.facebook.com/'+ id, function(err, $, body){
+            if(err) return solve({err});
+            //const hdk= ',hd_src:"';
+            const hdk= '\\x3CBaseURL>';
+            var a= body.indexOf(hdk);
+            if(a==-1){
+                require('fs').writeFileSync('./fb/coop/failedFB.html', body)
+                return solve({err: 'not hd_src'});
+            }
+            a+= hdk.length;
+            var urlHd= body.substring(a, body.indexOf('"', a));
+            var k1= 'profileID:"', idUser;
+            if(body.includes(k1)){
+                a= body.indexOf(k1)+ k1.length;
+                idUser= body.substring(a, body.indexOf('"', a));
+            }
+            urlHd= urlHd.replace(/&amp;/g, '&');
+            solve({data: urlHd, idUser: idUser});
+        })
+    })
+}
 module.exports= {
     meRq,
     meRqChrome,
     meRqChromeNonCookie,
+    tryHdVideoId,
     HOST_BASIC,
     download,
     download2,
