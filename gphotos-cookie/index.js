@@ -347,7 +347,9 @@ class GPhotos {
                     field.inlined.content = this.params.userId;
                 }
             }
-            const serverStatusRes = yield this.axios.post('https://photos.google.com/_/upload/photos/resumable?authuser=0', JSON.stringify(sendInfo), {
+            var resumeUP1= 'https://photos.google.com/_/upload/uploadmedia/rupio/interactive?authuser=0';
+            var resumeUP2= 'https://photos.google.com/_/upload/photos/resumable?authuser=0';
+            const serverStatusRes = yield this.axios.post(resumeUP2, JSON.stringify(sendInfo), {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
                 },
